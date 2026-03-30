@@ -1,381 +1,220 @@
-# 🗳️ Online Voting System (Spring Boot)
+# 💼 Job Platform System (Spring Boot)
 
-![Java](https://img.shields.io/badge/Java-17-orange)
+![Java](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/SpringBoot-3.x-green)
 ![MySQL](https://img.shields.io/badge/MySQL-8-blue)
 ![JWT](https://img.shields.io/badge/Auth-JWT-yellow)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)
 
-A secure, role-based online voting system built using Spring Boot, designed to simulate real-world digital elections with strong emphasis on **security, data integrity, and business rule enforcement**.
+A production-grade backend system for a job platform that connects employers with candidates, with strong focus on **job management, application lifecycle, and business rule enforcement**.
 
 ---
 
 ## 🎯 Project Overview
 
-This system models a real-world election platform where:
+This system simulates a real-world job platform where:
 
-* Admins create and manage elections
-* Voters participate securely in voting
-* The system guarantees **one vote per user**
-* Voting is restricted to a **specific time window**
-* Results are calculated dynamically and accurately
+* Employers create and manage job postings
+* Candidates apply for jobs
+* Applications go through controlled lifecycle states
+* The system enforces strict business rules and access control
 
-> The goal is to demonstrate backend system design, authentication, authorization, and enforcement of critical business rules.
+> The goal is to demonstrate real backend engineering: **not just CRUD, but system design**
 
 ---
 
 ## 🚀 Key Features
 
-* JWT Authentication (Access Token)
-* Role-Based Authorization (ADMIN / VOTER)
-* Election creation with time window
-* Candidate registration per election
-* Voter assignment to elections
-* One-time voting enforcement
-* Real-time result calculation
-* Input validation & structured error handling
+### 🔐 Authentication & Security
+
+* JWT Authentication (Access + Refresh Tokens)
+* Role-Based Authorization (EMPLOYER / CANDIDATE)
+* Stateless security model
+
+### 💼 Job Management
+
+* Create, update, delete jobs
+* Advanced filtering (title, location, salary, experience)
+* Pagination & sorting
+* Employer-specific job management
+
+### 📄 Application System
+
+* Apply to jobs
+* Track application status (PENDING / ACCEPTED / REJECTED)
+* Employer can update application status
+* Prevent duplicate applications
+
+### 📂 File Handling
+
+* Resume upload system
+* File metadata tracking
+
+### ⚙️ System Design
+
+* DTO-based architecture
+* Centralized exception handling
+* Clean layered architecture
 
 ---
 
 ## 🏗️ Architecture
-
-The system follows a **layered architecture**:
 
 ```text
 Client
    ↓
 Controller → Service → Repository → Database
    ↓
-Security Layer (JWT Filter)
+Security Layer (JWT)
    ↓
 Exception Handling Layer
 ```
 
-### Layers:
-
-* **Controller Layer**
-
-    * Handles HTTP requests and responses
-
-* **Service Layer**
-
-    * Contains business logic and rules enforcement
-
-* **Repository Layer**
-
-    * Data access via Spring Data JPA
-
-* **Security Layer**
-
-    * JWT authentication & authorization filters
-
-### Key Design Decisions:
-
-* Separation of concerns
-* DTO pattern for API contracts
-* Centralized exception handling
+* Business logic isolated in Service layer
+* DTOs used to prevent entity exposure
 * Stateless authentication using JWT
 
 ---
 
 ## 🔐 Security Design
 
-* Stateless authentication using JWT
 * All protected endpoints require:
 
-```
 Authorization: Bearer <token>
-```
 
 ### Flow:
 
 1. User logs in → receives JWT
-2. JWT is sent in request header
-3. Security filter validates token
-4. Role-based access control is applied
+2. JWT is validated in filter
+3. Role-based authorization applied
 
 ---
 
 ## ⚙️ Business Rules
 
-* A voter can vote **only once per election**
-* Voting allowed only between:
-
-    * `startTime` and `endTime`
-* Only assigned voters can participate
-* Admin-only operations:
-
-    * Create elections
-    * Assign voters
-    * Add candidates
-    * View results
-
----
-
-## 🧠 Challenges & Solutions
-
-### Preventing Duplicate Voting
-
-* Enforced via:
-
-    * Service-layer validation
-    * Unique constraint (voter + election)
-
----
-
-### Enforcing Voting Time Window
-
-* Compared current time with election window
-* Returned `403 Forbidden` if invalid
-
----
-
-### Securing Endpoints
-
-* Implemented JWT filter
-* Restricted access based on roles
+* A candidate cannot apply to the same job twice
+* Only employers can create/update jobs
+* Only candidates can apply
+* Application status transitions are controlled
+* Users can only access their own data
 
 ---
 
 ## 📁 Project Structure
 
 ```text
-src/main/java/com/onlinevotingsystem/
-│
-├── model/        → JPA entities
-├── dto/          → Request & Response DTOs
-├── repository/   → JPA repositories
-├── service/      → Business logic
-├── controller/   → REST APIs
-├── security/     → JWT & Security config
-├── exception/    → Global exception handling
-└── main class
+src/main/java/com/jobboard/
+
+├── controller
+├── service
+├── repository
+├── entity
+├── dto
+├── mapper
+├── security
+├── exception
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Category   | Technology                  |
-| ---------- |-----------------------------|
-| Framework  | Spring Boot                 |
-| Language   | Java  21                    |
-| Security   | Spring Security + JWT       |
-| ORM        | Spring Data JPA (Hibernate) |
-| Database   | MySQL / H2                  |
-| Validation | Jakarta Validation          |
-| API Docs   | Swagger (OpenAPI)           |
-| Build Tool | Maven                       |
+| Category   | Technology            |
+| ---------- | --------------------- |
+| Language   | Java 21               |
+| Framework  | Spring Boot 3         |
+| Security   | Spring Security + JWT |
+| ORM        | Spring Data JPA       |
+| Database   | MySQL                 |
+| Docs       | Swagger (OpenAPI)     |
+| Build Tool | Maven                 |
 
 ---
 
-## 🧪 Running the Project
+## 🌐 API Endpoints (Swagger-Based)
 
-### 1. Clone Repository
+### 🔐 Authentication
 
-```bash
-git clone <your-repo-link>
-cd online-voting-system
-```
+* POST `/api/auth/register`
+* POST `/api/auth/login`
+* POST `/api/auth/refresh`
 
----
+### 👤 Users
 
-### 2. Configure Database
+* GET `/api/users/me`
+* PUT `/api/users/me`
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/voting_system
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+### 💼 Jobs
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
+* GET `/api/jobs`
+* GET `/api/jobs/{id}`
+* POST `/api/jobs`
+* PUT `/api/jobs/{id}`
+* DELETE `/api/jobs/{id}`
+* PATCH `/api/jobs/{id}/close`
+* GET `/api/jobs/mine`
 
----
+### 📄 Applications
 
-### 3. Run Application
+* POST `/api/jobs/{jobId}/apply`
+* PATCH `/api/applications/{id}/status`
+* GET `/api/jobs/{jobId}/applications`
+* GET `/api/applications/me`
 
-```bash
-mvn spring-boot:run
-```
+### 📂 Files
 
----
-
-## 🌐 API Endpoints
-
-### 🔑 Authentication
-
-| Method | Endpoint            | Description     |
-| ------ | ------------------- | --------------- |
-| POST   | /api/auth/login     | Login & get JWT |
-| POST   | /api/users/register | Register user   |
-
----
-
-### 🗳️ Election (Admin)
-
-| Method | Endpoint                 | Description     |
-| ------ | ------------------------ | --------------- |
-| POST   | /api/admin/elections     | Create election |
-| POST   | /api/admin/voters/assign | Assign voter    |
-
----
-
-### 🎯 Candidate
-
-| Method | Endpoint              | Description     |
-| ------ | --------------------- | --------------- |
-| POST   | /api/admin/candidates | Add candidate   |
-| GET    | /api/voter/candidates | View candidates |
-
----
-
-### 📝 Voting
-
-| Method | Endpoint        | Description |
-| ------ | --------------- | ----------- |
-| POST   | /api/voter/vote | Cast vote   |
-
----
-
-### 📊 Results (Admin)
-
-| Method | Endpoint           | Description  |
-| ------ | ------------------ | ------------ |
-| GET    | /api/admin/results | View results |
+* POST `/api/files/resume`
 
 ---
 
 ## 📸 API Documentation
 
-Interactive API documentation available via Swagger:
+Swagger UI available at:
 
-```text
 http://localhost:8080/swagger-ui/index.html
-```
 
 ---
 
-## ⚠️ Error Handling & Exception Strategy
+## ⚠️ Error Handling
 
-The system implements a **centralized exception handling mechanism** using `@RestControllerAdvice`.
+Centralized exception handling using @RestControllerAdvice
 
----
-
-### 🧱 Error Response Structure
+### Response Example:
 
 ```json
 {
   "status": 400,
   "error": "Bad Request",
   "message": "Validation failed",
-  "path": "/api/example",
-  "timestamp": "2026-03-27T19:56:01"
+  "timestamp": "2026-03-30T17:48:35"
 }
 ```
 
 ---
 
-### 🔍 Validation Errors Example
+## 🧠 System Design Highlights
 
-```json
-{
-  "status": 400,
-  "error": "Bad Request",
-  "message": "Validation failed",
-  "validationErrors": {
-    "email": "must be valid",
-    "password": "min 8 chars"
-  }
-}
-```
-
----
-
-### 🧠 Exception Handling Coverage
-
-| Exception Type                   | HTTP Status | Description               |
-| -------------------------------- | ----------- | ------------------------- |
-| ResourceNotFoundException        | 404         | Resource not found        |
-| DuplicateApplicationException    | 409         | Prevent duplicate voting  |
-| InvalidStatusTransitionException | 422         | Invalid state change      |
-| ForbiddenOperationException      | 403         | Forbidden action          |
-| UnauthorizedException            | 403         | Custom access restriction |
-| BusinessException                | 400         | Business rule violation   |
-| FileUploadException              | 400         | File validation error     |
-| BadCredentialsException          | 401         | Invalid credentials       |
-| DisabledException                | 403         | Disabled account          |
-| AccessDeniedException            | 403         | Role-based denial         |
-| DataIntegrityViolationException  | 409         | DB constraint violation   |
-| MaxUploadSizeExceededException   | 400         | File too large            |
-| MethodArgumentNotValidException  | 400         | Validation failure        |
-| Exception                        | 500         | Unexpected error          |
-
----
-
-### 📂 Logging Strategy
-
-* `WARN` → business & validation errors
-* `ERROR` → system failures
-
-Example:
-
-```text
-WARN  - Duplicate vote attempt
-ERROR - Unexpected system error
-```
-
----
-
-## 🧠 System Design Summary
-
-```text
-Client
-   ↓
-Controller Layer
-   ↓
-Service Layer (Business Logic)
-   ↓
-Repository Layer (JPA)
-   ↓
-Database
-
-   ↓
-Security Layer (JWT)
-   ↓
-Exception Handling Layer
-```
+* Pagination support for scalability
+* Role-based access control
+* Clean DTO mapping
+* Controlled state transitions
+* Secure file handling
 
 ---
 
 ## 💣 Why This Project Matters
 
-* Demonstrates real backend engineering skills
-* Focuses on business rules, not just CRUD
-* Implements secure authentication
-* Handles real-world edge cases
-* Built with production mindset
+* Demonstrates real backend engineering
+* Includes business rules (not CRUD)
+* Covers authentication, authorization, and file handling
+* Designed with production mindset
 
 ---
 
 ## 👨‍💻 Author
 
-**Mahmoud Youssef**
-
-Backend Developer specializing in Spring Boot and secure system design.
-
----
-
-### 🧠 Project Ownership
-
-This project was fully developed independently, including:
-
-* System architecture design
-* Security implementation (JWT)
-* Business logic enforcement
-* Database modeling
-* Exception handling
-* API design
+Mahmoud Youssef
+Backend Developer (Spring Boot)
 
 ---
 
