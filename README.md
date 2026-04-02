@@ -1,3 +1,4 @@
+````md
 # 💼 Job Platform System (Spring Boot)
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
@@ -68,11 +69,35 @@ Controller → Service → Repository → Database
 Security Layer (JWT)
    ↓
 Exception Handling Layer
-```
+````
 
 * Business logic isolated in Service layer
 * DTOs used to prevent entity exposure
 * Stateless authentication using JWT
+
+---
+
+## 🧠 System Design Decisions
+
+### Why DTO Layer?
+
+To decouple internal entity models from external API contracts and prevent overexposure of sensitive fields.
+
+### Why JWT Authentication?
+
+JWT enables stateless authentication, improving scalability and eliminating server-side session storage.
+
+### Why Service Layer?
+
+To centralize and enforce business rules consistently across the system.
+
+### Why Pagination?
+
+To ensure scalability and prevent performance degradation with large datasets.
+
+### Why Layered Architecture?
+
+To maintain separation of concerns and improve maintainability and testability.
 
 ---
 
@@ -97,6 +122,54 @@ Authorization: Bearer <token>
 * Only candidates can apply
 * Application status transitions are controlled
 * Users can only access their own data
+
+---
+
+## 🧩 Core Business Logic
+
+### 📄 Application Lifecycle
+
+1. Candidate applies to a job
+2. System validates:
+
+    * Job is still open
+    * Candidate has not applied before
+3. Application created with status = `PENDING`
+4. Employer reviews application
+5. Status updated to:
+
+    * `ACCEPTED`
+    * `REJECTED`
+
+### 🔐 Authorization Logic
+
+* Employers:
+
+    * Can manage only their own jobs
+    * Can view applications for their jobs only
+
+* Candidates:
+
+    * Can apply to jobs
+    * Can view only their own applications
+
+### 🚫 Validation Rules
+
+* Duplicate applications are blocked at service level
+* Invalid state transitions are rejected
+* Unauthorized access throws proper exceptions
+
+---
+
+## 💡 What Makes This Project Different?
+
+* Not just CRUD — real-world business rules enforced
+* Controlled application lifecycle with strict state transitions
+* Role-based access control implemented at service level
+* Production-oriented architecture (DTO, exception handling, security)
+* Clean separation between layers
+
+> This project focuses on **real backend engineering**, not just endpoints.
 
 ---
 
@@ -128,6 +201,36 @@ src/main/java/com/jobboard/
 | Database   | MySQL                 |
 | Docs       | Swagger (OpenAPI)     |
 | Build Tool | Maven                 |
+
+---
+
+## ▶️ How to Run
+
+### 🔧 Prerequisites
+
+* Java 21
+* Maven
+* MySQL 8
+
+### 🚀 Steps
+
+```bash
+git clone https://github.com/your-username/job-platform.git
+cd job-platform
+mvn clean install
+mvn spring-boot:run
+```
+
+### ⚙️ Database Configuration
+
+Update `application.properties`:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/job_platform
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+```
 
 ---
 
@@ -171,7 +274,45 @@ src/main/java/com/jobboard/
 
 Swagger UI available at:
 
-http://localhost:8080/swagger-ui/index.html
+[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
+---
+
+## 🧪 Try the API
+
+After running the application:
+
+👉 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
+You can test:
+
+* Authentication
+* Jobs
+* Applications
+* Users
+
+---
+
+## 🧱 Detailed Architecture
+
+```text
+[Client]
+   ↓
+[Controller Layer]
+   ↓
+[Service Layer] → Business Rules Enforcement
+   ↓
+[Repository Layer]
+   ↓
+[Database]
+
+[Security Layer]
+- JWT Filter
+- Authentication Provider
+
+[Exception Layer]
+- Global Exception Handler
+```
 
 ---
 
@@ -189,6 +330,17 @@ Centralized exception handling using @RestControllerAdvice
   "timestamp": "2026-03-30T17:48:35"
 }
 ```
+
+---
+
+## 🧠 Engineering Highlights
+
+* Clean layered architecture
+* DTO pattern to protect domain models
+* Stateless JWT authentication
+* Centralized exception handling
+* Strong business rule enforcement
+* Pagination and filtering support
 
 ---
 
@@ -226,3 +378,6 @@ A backend system that is:
 * ✅ Scalable
 * ✅ Maintainable
 * ✅ Production-ready
+
+
+
