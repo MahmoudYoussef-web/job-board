@@ -17,10 +17,7 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
-     * Returns the authenticated user's own profile.
-     * GET /api/users/me
-     */
+   
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getMyProfile(
             @AuthenticationPrincipal UserDetailsImpl principal) {
@@ -28,11 +25,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getProfile(principal.getId()));
     }
 
-    /**
-     * Updates mutable fields on the authenticated user's own profile.
-     * Email, password, and role changes require dedicated flows.
-     * PUT /api/users/me
-     */
+   
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMyProfile(
             @Valid @RequestBody UpdateProfileRequest request,
