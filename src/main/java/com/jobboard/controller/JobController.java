@@ -24,14 +24,6 @@ public class JobController {
 
     private final JobService jobService;
 
-    // ----------------------------------------------------------------
-    // Public endpoints (no auth required — permitted in SecurityConfig)
-    // ----------------------------------------------------------------
-
-    /**
-     * Search open jobs with optional filters.
-     * GET /api/jobs?title=java&location=cairo&salaryMin=1000&page=0&size=10&sort=createdAt,desc
-     */
     @GetMapping
     public ResponseEntity<Page<JobResponse>> searchJobs(
             JobSearchRequest filter,
@@ -41,23 +33,13 @@ public class JobController {
         return ResponseEntity.ok(jobService.searchJobs(filter, pageable));
     }
 
-    /**
-     * Get a single open job by ID.
-     * GET /api/jobs/{id}
-     */
+  
     @GetMapping("/{id}")
     public ResponseEntity<JobResponse> getJob(@PathVariable Long id) {
         return ResponseEntity.ok(jobService.getById(id));
     }
 
-    // ----------------------------------------------------------------
-    // Employer endpoints
-    // ----------------------------------------------------------------
 
-    /**
-     * Create a new job posting.
-     * POST /api/jobs
-     */
     @PostMapping
     @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<JobResponse> createJob(
@@ -68,10 +50,7 @@ public class JobController {
                 .body(jobService.createJob(principal.getId(), request));
     }
 
-    /**
-     * Update an existing job (employer must own it).
-     * PUT /api/jobs/{id}
-     */
+  
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<JobResponse> updateJob(
@@ -82,10 +61,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.updateJob(principal.getId(), id, request));
     }
 
-    /**
-     * Close a job (stops new applications).
-     * PATCH /api/jobs/{id}/close
-     */
+   
     @PatchMapping("/{id}/close")
     @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<JobResponse> closeJob(
@@ -95,10 +71,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.closeJob(principal.getId(), id));
     }
 
-    /**
-     * Delete a job posting.
-     * DELETE /api/jobs/{id}
-     */
+ 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<Void> deleteJob(
@@ -109,10 +82,7 @@ public class JobController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Employer's own job listings.
-     * GET /api/jobs/mine
-     */
+ 
     @GetMapping("/mine")
     @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<Page<JobResponse>> getMyJobs(
