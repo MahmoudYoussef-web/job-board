@@ -4,7 +4,6 @@ import com.jobboard.dto.request.ApplicationRequest;
 import com.jobboard.dto.request.ApplicationStatusRequest;
 import com.jobboard.dto.response.ApplicationResponse;
 import com.jobboard.entity.Application;
-import com.jobboard.entity.CvAnalysis;
 import com.jobboard.entity.Job;
 import com.jobboard.entity.User;
 import com.jobboard.enums.ApplicationStatus;
@@ -35,8 +34,6 @@ public class ApplicationService {
     private final UserService userService;
     private final ApplicationMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final CvAnalysisService cvAnalysisService;
-    private final MatchingService matchingService;
 
     @Transactional
     public ApplicationResponse apply(Long candidateId,
@@ -74,28 +71,17 @@ public class ApplicationService {
             throw new BusinessException("Application deadline has passed");
         }
 
-        CvAnalysis cv = cvAnalysisService.getLatest(candidateId);
-        if (cv == null || cv.getScore() < 40) {
-            log.warn("Application rejected: weak CV, candidateId={}", candidateId);
-            throw new BusinessException("CV score too low");
-        }
-
-        MatchingService.MatchResult result = matchingService.calculateMatch(job, cv);
-
         Application app = Application.builder()
                 .job(job)
                 .candidate(user)
                 .coverLetter(request.getCoverLetter())
                 .resumeUrl(resumeUrl)
-                .applicationScore(result.getScore())
-                .matchLevel(result.getMatchLevel())
                 .status(ApplicationStatus.PENDING)
                 .build();
 
         Application saved = applicationRepository.save(app);
 
-        log.info("Application created: jobId={}, candidateId={}, score={}, level={}",
-                jobId, candidateId, result.getScore(), result.getMatchLevel());
+        log.info("Application created: jobId={}, candidateId={}", jobId, candidateId);
 
         return mapper.toCandidateResponse(saved);
     }

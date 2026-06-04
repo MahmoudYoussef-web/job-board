@@ -1,6 +1,6 @@
 package com.jobboard.service.event;
 
-import com.jobboard.service.CvAnalysisService;
+import com.jobboard.service.ResumeParserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CvAnalysisListener {
 
-    private final CvAnalysisService cvAnalysisService;
+    private final ResumeParserService resumeParserService;
 
     @Async
     @EventListener
     public void handle(ResumeUploadedEvent event) {
-        cvAnalysisService.analyzeAndSave(event.getUserId(), event.getFilePath());
-        log.info("Async CV analysis done for userId={}", event.getUserId());
+        resumeParserService.parseAndSave(event.getUserId(), event.getFilePath());
+        log.info("Resume parsed for userId={}", event.getUserId());
     }
 
 }
