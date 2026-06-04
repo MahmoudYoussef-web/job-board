@@ -14,108 +14,241 @@ A production-grade **Smart Recruitment Management System** connecting employers 
 
 ---
 
-## 📐 System Architecture
+## 🏗 System Architecture
 
+```mermaid
+flowchart LR
+    %% Styles
+    classDef client fill:#f0f4ff,stroke:#4a90d9,stroke-width:2px,color:#1a1a2e
+    classDef security fill:#ffe8e8,stroke:#e74c3c,stroke-width:2px,color:#1a1a2e
+    classDef api fill:#e8f8f5,stroke:#1abc9c,stroke-width:2px,color:#1a1a2e
+    classDef service fill:#eaf2fa,stroke:#3498db,stroke-width:2px,color:#1a1a2e
+    classDef repo fill:#e8f5e9,stroke:#27ae60,stroke-width:2px,color:#1a1a2e
+    classDef db fill:#fef9e7,stroke:#f39c12,stroke-width:2px,color:#1a1a2e
+
+    %% ── Client Layer ──
+    Client(["👥 Candidates & Employers"])
+    Client:::client
+
+    %% ── Security Layer ──
+    subgraph Security_Layer["🔒 Security Layer"]
+        direction TB
+        JWT["JWT Authentication<br/><span style='font-size:11px'>Access + Refresh Tokens</span>"]
+        ROLE["Role Authorization<br/><span style='font-size:11px'>@PreAuthorize(hasRole)</span>"]
+        CORS["CORS Configuration<br/><span style='font-size:11px'>localhost:5173</span>"]
+    end
+
+    %% ── API Layer ──
+    subgraph API_Layer["🌐 API Layer — REST Controllers"]
+        direction TB
+        AUTH["Auth<br/><span style='font-size:11px'>/register · /login · /refresh</span>"]
+        JOBCTRL["Job<br/><span style='font-size:11px'>CRUD · Search · Close</span>"]
+        APPCTRL["Application<br/><span style='font-size:11px'>Apply · Status · Rank</span>"]
+        RESUMECTRL["Resume<br/><span style='font-size:11px'>Upload · Parse · Refresh</span>"]
+        COMPANYCTRL["Company<br/><span style='font-size:11px'>Create · Update</span>"]
+        INTERVCTRL["Interview<br/><span style='font-size:11px'>Schedule · Feedback</span>"]
+        SKILLCTRL["Skill Gap<br/><span style='font-size:11px'>Analysis · Importance</span>"]
+        DASHCTRL["Dashboard<br/><span style='font-size:11px'>Analytics · Stats</span>"]
+    end
+
+    %% ── Service Layer ──
+    subgraph Service_Layer["⚙️ Service Layer — Business Logic"]
+        direction TB
+        AUTHSVC["Auth Service<br/><span style='font-size:11px'>JWT · Refresh · BCrypt</span>"]
+        JOBSVC["Job Service<br/><span style='font-size:11px'>CRUD · Specification Search</span>"]
+        APPSVC["Application Service<br/><span style='font-size:11px'>Apply · Score · State Machine</span>"]
+        RESUMESVC["Resume Parser<br/><span style='font-size:11px'>PDFBox + Regex Extraction</span>"]
+        SKILLDICT["Skill Dictionary<br/><span style='font-size:11px'>45+ Skills · Synonyms</span>"]
+        MATCHSVC["Matching Engine<br/><span style='font-size:11px'>Rule-Based · Weighted Scoring</span>"]
+        TRANSITIONS["Status Transition Validator<br/><span style='font-size:11px'>10-State ATS Workflow</span>"]
+        COMPSVC["Company Service<br/><span style='font-size:11px'>Profiles · Verification</span>"]
+        INTERVSVC["Interview Service<br/><span style='font-size:11px'>Schedule · Feedback · Cancel</span>"]
+        DASHSVC["Dashboard Service<br/><span style='font-size:11px'>Aggregated Analytics</span>"]
+        FILESVC["File Storage<br/><span style='font-size:11px'>Resume Upload · Retrieval</span>"]
+    end
+
+    %% ── Repository Layer ──
+    subgraph Repository_Layer["💾 Repository Layer — Data Access"]
+        direction TB
+        USERREPO["User Repository"]
+        JOBREPO["Job Repository"]
+        APPREPO["Application Repository"]
+        RESUMEREPO["Resume Profile Repository"]
+        COMPANYREPO["Company Repository"]
+        INTERVREPO["Interview Repository"]
+        HISTREPO["Application History Repository"]
+    end
+
+    %% ── Database Layer ──
+    DB[("🗄️ MySQL 8<br/><span style='font-size:11px'>7 Tables · Unique Indexes</span>")]
+    DB:::db
+
+    %% ── Flow Connections ──
+    Client --> JWT
+    JWT --> ROLE
+    ROLE --> CORS
+
+    CORS --> AUTH
+    CORS --> JOBCTRL
+    CORS --> APPCTRL
+    CORS --> RESUMECTRL
+    CORS --> COMPANYCTRL
+    CORS --> INTERVCTRL
+    CORS --> SKILLCTRL
+    CORS --> DASHCTRL
+
+    AUTH --> AUTHSVC
+    JOBCTRL --> JOBSVC
+    APPCTRL --> APPSVC
+    RESUMECTRL --> RESUMESVC
+    COMPANYCTRL --> COMPSVC
+    INTERVCTRL --> INTERVSVC
+    SKILLCTRL --> MATCHSVC
+    DASHCTRL --> DASHSVC
+
+    RESUMESVC --> SKILLDICT
+    MATCHSVC --> SKILLDICT
+    APPSVC --> MATCHSVC
+    APPSVC --> TRANSITIONS
+
+    AUTHSVC --> USERREPO
+    JOBSVC --> JOBREPO
+    APPSVC --> APPREPO
+    RESUMESVC --> RESUMEREPO
+    COMPSVC --> COMPANYREPO
+    INTERVSVC --> INTERVREPO
+    DASHSVC --> APPREPO
+    DASHSVC --> JOBREPO
+    DASHSVC --> INTERVREPO
+    APPSVC --> HISTREPO
+
+    USERREPO --> DB
+    JOBREPO --> DB
+    APPREPO --> DB
+    RESUMEREPO --> DB
+    COMPANYREPO --> DB
+    INTERVREPO --> DB
+    HISTREPO --> DB
+
+    %% Assign styles
+    Client:::client
+    JWT:::security
+    ROLE:::security
+    CORS:::security
+    AUTH:::api
+    JOBCTRL:::api
+    APPCTRL:::api
+    RESUMECTRL:::api
+    COMPANYCTRL:::api
+    INTERVCTRL:::api
+    SKILLCTRL:::api
+    DASHCTRL:::api
+    AUTHSVC:::service
+    JOBSVC:::service
+    APPSVC:::service
+    RESUMESVC:::service
+    SKILLDICT:::service
+    MATCHSVC:::service
+    TRANSITIONS:::service
+    COMPSVC:::service
+    INTERVSVC:::service
+    DASHSVC:::service
+    FILESVC:::service
+    USERREPO:::repo
+    JOBREPO:::repo
+    APPREPO:::repo
+    RESUMEREPO:::repo
+    COMPANYREPO:::repo
+    INTERVREPO:::repo
+    HISTREPO:::repo
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        🌐 HTTP Clients                              │
-│              (Mobile App · Web App · Swagger UI)                    │
-└─────────────────────────┬───────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🛡️  Security Layer                               │
-│                                                                     │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
-│  │   JWT Filter      │  │  Auth Entry Point│  │  CORS Filter     │  │
-│  │ (AuthToken)       │  │  (401 Handler)   │  │ (localhost:5173) │  │
-│  └────────┬─────────┘  └──────────────────┘  └──────────────────┘  │
-│           │                                                         │
-│           ▼                                                         │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │   @PreAuthorize("hasRole") / @PreAuthorize("hasAnyRole")    │   │
-│  │   Role Checkpoint Layer                                      │   │
-│  │   EMPLOYER → job CRUD, applications, interviews              │   │
-│  │   CANDIDATE → apply, resume, skill gap                      │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🎮  Controller Layer                              │
-│                                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────────┐  │
-│  │  Auth    │  │  User    │  │    Job      │  │  Application     │  │
-│  │Controller│  │Controller│  │ Controller  │  │  Controller      │  │
-│  └──────────┘  └──────────┘  └────────────┘  └──────────────────┘  │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────────┐  │
-│  │  Resume  │  │Company   │  │  Interview  │  │  Skill-Gap       │  │
-│  │Controller│  │Controller│  │  Controller │  │  Controller      │  │
-│  └──────────┘  └──────────┘  └────────────┘  └──────────────────┘  │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │  DashboardController 🧮 (EMPLOYER analytics)                  │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    ⚙️  Service Layer (Business Logic)                │
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │  AuthService       │  UserService       │  JobService        │   │
-│  │  (JWT + Refresh)   │  (Profile Mgmt)    │  (CRUD + Search)   │   │
-│  ├────────────────────┼────────────────────┼────────────────────┤   │
-│  │  ResumeParser      │  SkillDictionary   │  SkillGapAnalysis  │   │
-│  │  (PDFBox + Regex)  │  (45+ skills)      │  (Matching Engine) │   │
-│  ├────────────────────┼────────────────────┼────────────────────┤   │
-│  │  ApplicationService│  StatusTransition  │  CompanyService    │   │
-│  │  (Apply + Score)   │  Validator (10 st) │  (Profile Mgmt)    │   │
-│  ├────────────────────┼────────────────────┼────────────────────┤   │
-│  │  InterviewService  │  DashboardService  │  FileStorage       │   │
-│  │  (Schedule+Feedback)│  (Analytics)      │  (Resume Upload)   │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  🧠 Matching Engine: Rule-based (no ML/LLM) — dictionary matching  │
-│  + regex extraction + weighted scoring with importance levels       │
-└─────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    📦  Repository Layer (Data Access)                │
-│                                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────────┐  │
-│  │  User    │  │  Job     │  │Application │  │  ResumeProfile   │  │
-│  │Repo      │  │Repo      │  │Repo        │  │  Repo            │  │
-│  └──────────┘  └──────────┘  └────────────┘  └──────────────────┘  │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────────────┐  │
-│  │  Company │  │Interview │  │AppHistory  │  │  CvAnalysis      │  │
-│  │Repo      │  │Repo      │  │Repo        │  │  Repo            │  │
-│  └──────────┘  └──────────┘  └────────────┘  └──────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    🗄️  Database Layer (MySQL 8)                      │
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │  Tables: users, jobs, applications, resume_profiles           │   │
-│  │           companies, interviews, application_histories        │   │
-│  │                                                               │   │
-│  │  Indexes: job_id + candidate_id (unique constraint)           │   │
-│  │           status, applied_at, application_score               │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
+
+---
+
+## 📊 Layer Legend
+
+| Color | Layer | Responsibility | Key Components |
+|-------|-------|---------------|----------------|
+| 🔵 Blue | Client | End users interacting via HTTP | Mobile App, Web Browser, Swagger UI |
+| 🔴 Red | Security | Authentication & authorization | JWT Filter, Role Check, CORS |
+| 🟢 Teal | API | RESTful endpoint exposure | 9 Controllers (Auth, Job, Application, Resume, etc.) |
+| 🔷 Blue | Service | Core business logic & orchestration | Matching Engine, ATS Workflow, PDF Parser, Dashboard |
+| 🟢 Green | Repository | Data access via Spring Data JPA | 7 Repositories with custom queries |
+| 🟡 Yellow | Database | Persistent storage | MySQL 8 with indexes & constraints |
+
+---
+
+## 🔄 Application Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant C as 👤 Candidate
+    participant UI as 🌐 HTTP Client
+    participant A as 🎮 ApplicationController
+    participant S as ⚙️ ApplicationService
+    participant R as 📄 ResumeParser
+    participant M as 🧠 Matching Engine
+    participant DB as 🗄️ Database
+
+    Note over C,DB: Step 1: Apply for a Job
+
+    C->>UI: POST /api/jobs/{jobId}/apply
+    UI->>A: Forward Request
+    A->>S: createApplication()
+
+    Note over S: Step 2: Validate
+
+    S->>S: Check job is OPEN
+    S->>S: Check no duplicate application
+    S->>S: Check resume exists
+
+    Note over S: Step 3: Parse Resume
+
+    S->>R: extractSkills(jobRequirements)
+    S->>R: extractSkills(resumeText)
+    R-->>S: candidateSkills + jobSkills
+
+    Note over S: Step 4: Match & Score
+
+    S->>M: analyze(jobSkills, candidateSkills)
+    M->>M: Expand synonyms via Dictionary
+    M->>M: Calculate match score
+    M->>M: Determine importance level
+    M-->>S: AnalysisResult (score, matchLevel, missingSkills + importance)
+
+    Note over S: Step 5: Persist
+
+    S->>DB: Save Application (with score)
+    DB-->>S: ✅ Application saved
+
+    S-->>A: ApplicationResponse
+    A-->>UI: 201 Created
+    UI-->>C: ✅ Application Submitted<br/>Score: 82% · Match Level: HIGH
 ```
 
-### Diagram Legend
+### ATS State Machine
 
-| Shape | Layer | Description |
-|-------|-------|-------------|
-| 🛡️ | Security | JWT authentication, role-based access, CORS |
-| 🎮 | Controller | REST endpoints — receives requests, delegates to services |
-| ⚙️ | Service | Business logic, validation, orchestration, matching |
-| 📦 | Repository | Data access via Spring Data JPA |
-| 🗄️ | Database | MySQL 8 with indexes and unique constraints |
+```mermaid
+flowchart TD
+    PENDING -->|Approve| APPROVED
+    PENDING -->|Reject| REJECTED
+    APPROVED -->|Schedule| INTERVIEW
+    APPROVED -->|Reject| REJECTED
+    INTERVIEW -->|Pass| OFFER
+    INTERVIEW -->|Fail| REJECTED
+    OFFER -->|Accept| HIRED
+    OFFER -->|Decline| REJECTED
+
+    classDef pending fill:#ffeaa7,stroke:#fdcb6e
+    classDef active fill:#74b9ff,stroke:#0984e3
+    classDef success fill:#55efc4,stroke:#00b894
+    classDef fail fill:#ff7675,stroke:#d63031
+    classDef terminal fill:#dfe6e9,stroke:#636e72
+
+    class PENDING pending
+    class APPROVED,INTERVIEW,OFFER active
+    class HIRED success
+    class REJECTED fail
 
 ---
 
