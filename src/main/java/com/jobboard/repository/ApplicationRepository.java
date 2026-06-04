@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -77,4 +78,17 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     long countByJobIdAndStatus(Long jobId, ApplicationStatus status);
 
     long countByCandidateId(Long candidateId);
+
+    // ----------------------------------------------------------------
+    // Dashboard queries
+    // ----------------------------------------------------------------
+
+    @Query("SELECT COUNT(a) FROM Application a WHERE a.job.employer.id = :employerId")
+    long countByEmployerId(@Param("employerId") Long employerId);
+
+    @Query("SELECT COUNT(a) FROM Application a WHERE a.job.employer.id = :employerId AND a.status = :status")
+    long countByEmployerIdAndStatus(@Param("employerId") Long employerId, @Param("status") ApplicationStatus status);
+
+    @Query("SELECT a FROM Application a WHERE a.job.employer.id = :employerId AND a.applicationScore IS NOT NULL ORDER BY a.applicationScore DESC")
+    List<Application> findTopByEmployerIdOrderByScoreDesc(@Param("employerId") Long employerId, Pageable pageable);
 }

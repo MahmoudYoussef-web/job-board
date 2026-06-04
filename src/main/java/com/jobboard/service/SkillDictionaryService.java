@@ -48,6 +48,15 @@ public class SkillDictionaryService {
         return entry != null ? entry.getCategory() : "OTHER";
     }
 
+    public String getImportance(String skillKey) {
+        String category = getCategory(skillKey);
+        return switch (category) {
+            case "BACKEND", "DATABASE", "DEVOPS", "CLOUD", "ARCHITECTURE", "CS_FUNDAMENTALS" -> "HIGH";
+            case "FRONTEND", "AI", "TESTING" -> "MEDIUM";
+            default -> "LOW";
+        };
+    }
+
     public Set<String> expandSkills(Set<String> skillKeys) {
         Set<String> expanded = new HashSet<>();
         for (String key : skillKeys) {

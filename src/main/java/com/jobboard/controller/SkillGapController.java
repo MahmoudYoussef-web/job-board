@@ -1,6 +1,7 @@
 package com.jobboard.controller;
 
 import com.jobboard.dto.response.SkillGapResponse;
+import com.jobboard.dto.response.SkillGapResponse.MissingSkill;
 import com.jobboard.entity.Job;
 import com.jobboard.entity.ResumeProfile;
 import com.jobboard.exception.BusinessException;
@@ -9,6 +10,7 @@ import com.jobboard.repository.JobRepository;
 import com.jobboard.repository.ResumeProfileRepository;
 import com.jobboard.security.UserDetailsImpl;
 import com.jobboard.service.SkillGapAnalysisService;
+import com.jobboard.service.SkillGapAnalysisService.MissingSkillInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/skill-gap")
@@ -42,7 +45,7 @@ public class SkillGapController {
                     .matchScore(0)
                     .matchLevel("NONE")
                     .matchedSkills(Set.of())
-                    .missingSkills(Set.of())
+                    .missingSkills(List.of())
                     .candidateExtraSkills(Set.of())
                     .recommendations(Map.of())
                     .learningPath(List.of())
@@ -63,11 +66,18 @@ public class SkillGapController {
             learningPath.add(rec.getKey() + " - " + rec.getValue());
         }
 
+        List<MissingSkill> missingWithImportance = result.getMissingSkillsWithImportance().stream()
+                .map(m -> MissingSkill.builder()
+                        .skill(m.getSkill())
+                        .importance(m.getImportance())
+                        .build())
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(SkillGapResponse.builder()
                 .matchScore(result.getScore())
                 .matchLevel(result.getMatchLevel().name())
                 .matchedSkills(result.getMatchedSkills())
-                .missingSkills(result.getMissingSkills())
+                .missingSkills(missingWithImportance)
                 .candidateExtraSkills(result.getCandidateExtraSkills())
                 .recommendations(result.getRecommendations())
                 .learningPath(learningPath)

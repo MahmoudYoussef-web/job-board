@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
+    @Query("SELECT COUNT(i) FROM Interview i WHERE i.application.job.employer.id = :employerId AND i.status = :status")
+    long countScheduledByEmployerId(@Param("employerId") Long employerId, @Param("status") InterviewStatus status);
+
     Page<Interview> findByCandidateId(Long candidateId, Pageable pageable);
 
     Page<Interview> findByInterviewerId(Long interviewerId, Pageable pageable);

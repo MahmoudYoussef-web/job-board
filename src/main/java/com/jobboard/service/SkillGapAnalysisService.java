@@ -33,6 +33,13 @@ public class SkillGapAnalysisService {
                 .map(skillDictionaryService::getDisplayName)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
+        List<MissingSkillInfo> missingWithImportance = missing.stream()
+                .map(key -> MissingSkillInfo.builder()
+                        .skill(skillDictionaryService.getDisplayName(key))
+                        .importance(skillDictionaryService.getImportance(key))
+                        .build())
+                .collect(Collectors.toList());
+
         Set<String> extra = new HashSet<>(expandedCandidate);
         extra.removeAll(expandedJob);
 
@@ -58,6 +65,7 @@ public class SkillGapAnalysisService {
                 .matchLevel(level)
                 .matchedSkills(matchedDisplay)
                 .missingSkills(missingDisplay)
+                .missingSkillsWithImportance(missingWithImportance)
                 .candidateExtraSkills(extraDisplay)
                 .recommendations(recommendations)
                 .build();
@@ -97,7 +105,15 @@ public class SkillGapAnalysisService {
         private MatchLevel matchLevel;
         private Set<String> matchedSkills;
         private Set<String> missingSkills;
+        private List<MissingSkillInfo> missingSkillsWithImportance;
         private Set<String> candidateExtraSkills;
         private Map<String, String> recommendations;
+    }
+
+    @Data
+    @Builder
+    public static class MissingSkillInfo {
+        private String skill;
+        private String importance;
     }
 }
