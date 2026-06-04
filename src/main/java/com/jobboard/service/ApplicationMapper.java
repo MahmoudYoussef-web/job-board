@@ -21,6 +21,9 @@ public class ApplicationMapper {
                 .resumeUrl(app.getResumeUrl())
                 .status(app.getStatus())
                 .employerNotes(app.getEmployerNotes())
+                .applicationScore(app.getApplicationScore())
+                .matchLevel(app.getMatchLevel() != null ? app.getMatchLevel().name() : null)
+                .missingSkills(app.getMissingSkills())
                 .appliedAt(app.getAppliedAt())
                 .updatedAt(app.getUpdatedAt())
                 .build();

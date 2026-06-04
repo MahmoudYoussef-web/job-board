@@ -12,8 +12,10 @@ import com.jobboard.enums.Role;
 import com.jobboard.exception.BusinessException;
 import com.jobboard.exception.ResourceNotFoundException;
 import com.jobboard.exception.UnauthorizedException;
+import com.jobboard.entity.ResumeProfile;
 import com.jobboard.repository.ApplicationRepository;
 import com.jobboard.repository.JobRepository;
+import com.jobboard.repository.ResumeProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,8 @@ public class ApplicationService {
     private final UserService userService;
     private final ApplicationMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final ResumeProfileRepository resumeProfileRepository;
+    private final SkillGapAnalysisService skillGapAnalysisService;
 
     @Transactional
     public ApplicationResponse apply(Long candidateId,
@@ -79,9 +84,26 @@ public class ApplicationService {
                 .status(ApplicationStatus.PENDING)
                 .build();
 
+        ResumeProfile resume = resumeProfileRepository
+                .findTopByCandidateIdAndIsPrimaryTrue(candidateId)
+                .orElse(null);
+
+        if (resume != null) {
+            Set<String> jobSkills = skillGapAnalysisService.extractSkillsFromJob(job.getRequirements());
+            Set<String> candidateSkills = skillGapAnalysisService.extractSkillsFromResume(resume.getSkills());
+
+            SkillGapAnalysisService.AnalysisResult result =
+                    skillGapAnalysisService.analyze(jobSkills, candidateSkills);
+
+            app.setApplicationScore(result.getScore());
+            app.setMatchLevel(result.getMatchLevel());
+            app.setMissingSkills(String.join(",", result.getMissingSkills()));
+        }
+
         Application saved = applicationRepository.save(app);
 
-        log.info("Application created: jobId={}, candidateId={}", jobId, candidateId);
+        log.info("Application created: jobId={}, candidateId={}, score={}",
+                jobId, candidateId, saved.getApplicationScore());
 
         return mapper.toCandidateResponse(saved);
     }
@@ -112,7 +134,7 @@ public class ApplicationService {
             throw new UnauthorizedException("Not your job");
         }
 
-        return applicationRepository.findByJobId(jobId, pageable)
+        return applicationRepository.findByJobIdOrderByScoreDesc(jobId, pageable)
                 .map(mapper::toResponse);
     }
 

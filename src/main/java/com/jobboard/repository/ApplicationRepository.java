@@ -65,6 +65,13 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Page<Application> findByEmployerId(@Param("employerId") Long employerId, Pageable pageable);
 
     /**
+     * Applications for a specific job, sorted by score descending (highest first).
+     * Used by the employer to see ranked candidates.
+     */
+    @Query("SELECT a FROM Application a WHERE a.job.id = :jobId ORDER BY a.applicationScore DESC NULLS LAST")
+    Page<Application> findByJobIdOrderByScoreDesc(@Param("jobId") Long jobId, Pageable pageable);
+
+    /**
      * Count applications by status for a job — used in job statistics.
      */
     long countByJobIdAndStatus(Long jobId, ApplicationStatus status);

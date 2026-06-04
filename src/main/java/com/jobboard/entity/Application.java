@@ -74,6 +74,9 @@ public class Application {
     @Column(name = "match_level", length = 10)
     private MatchLevel matchLevel;
 
+    @Column(name = "missing_skills", columnDefinition = "TEXT")
+    private String missingSkills;
+
     @CreatedDate
     @Column(name = "applied_at", nullable = false, updatable = false)
     private LocalDateTime appliedAt;

@@ -32,6 +32,10 @@ public class ApplicationResponse {
      */
     private String employerNotes;
 
+    private Integer applicationScore;
+    private String matchLevel;
+    private String missingSkills;
+
     private LocalDateTime appliedAt;
     private LocalDateTime updatedAt;
 }
