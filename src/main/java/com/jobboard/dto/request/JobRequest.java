@@ -42,4 +42,6 @@ public class JobRequest {
     @Future
     private LocalDate deadline;
 
+    private Long companyId;
+
 }

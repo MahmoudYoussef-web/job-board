@@ -32,5 +32,9 @@ public class JobResponse {
     /** Employer summary — avoids exposing full User entity */
     private Long employerId;
     private String employerName;
+
+    /** Company info */
+    private Long companyId;
     private String companyName;
+    private String companyLogoUrl;
 }

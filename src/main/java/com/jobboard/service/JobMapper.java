@@ -8,6 +8,18 @@ import org.springframework.stereotype.Component;
 public class JobMapper {
 
     public JobResponse toResponse(Job job) {
+        String companyName = null;
+        Long companyId = null;
+        String companyLogoUrl = null;
+        if (job.getCompany() != null) {
+            companyName = job.getCompany().getName();
+            companyId = job.getCompany().getId();
+            companyLogoUrl = job.getCompany().getLogoUrl();
+        }
+        if (companyName == null) {
+            companyName = job.getEmployer().getCompanyName();
+        }
+
         return JobResponse.builder()
                 .id(job.getId())
                 .title(job.getTitle())
@@ -25,7 +37,9 @@ public class JobMapper {
                 .updatedAt(job.getUpdatedAt())
                 .employerId(job.getEmployer().getId())
                 .employerName(job.getEmployer().getFullName())
-                .companyName(job.getEmployer().getCompanyName())
+                .companyId(companyId)
+                .companyName(companyName)
+                .companyLogoUrl(companyLogoUrl)
                 .build();
     }
 }

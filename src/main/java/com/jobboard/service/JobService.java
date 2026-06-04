@@ -4,11 +4,13 @@ import com.jobboard.dto.request.JobRequest;
 import com.jobboard.dto.request.JobSearchRequest;
 import com.jobboard.dto.request.JobStatusRequest;
 import com.jobboard.dto.response.JobResponse;
+import com.jobboard.entity.Company;
 import com.jobboard.entity.Job;
 import com.jobboard.entity.User;
 import com.jobboard.enums.JobStatus;
 import com.jobboard.exception.ForbiddenOperationException;
 import com.jobboard.exception.ResourceNotFoundException;
+import com.jobboard.repository.CompanyRepository;
 import com.jobboard.repository.JobRepository;
 import com.jobboard.specification.JobSpecification;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class JobService {
     private final JobRepository jobRepository;
     private final UserService   userService;
     private final JobMapper     jobMapper;
+    private final CompanyRepository companyRepository;
 
     // ----------------------------------------------------------------
     // Public search (open to all)
@@ -53,8 +56,15 @@ public class JobService {
     public JobResponse createJob(Long employerId, JobRequest request) {
         User employer = userService.findById(employerId);
 
+        Company company = null;
+        if (request.getCompanyId() != null) {
+            company = companyRepository.findById(request.getCompanyId())
+                    .orElse(null);
+        }
+
         Job job = Job.builder()
                 .employer(employer)
+                .company(company)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .requirements(request.getRequirements())
@@ -77,6 +87,13 @@ public class JobService {
     public JobResponse updateJob(Long employerId, Long jobId, JobRequest request) {
         Job job = findJobOwnedBy(employerId, jobId);
 
+        Company company = null;
+        if (request.getCompanyId() != null) {
+            company = companyRepository.findById(request.getCompanyId())
+                    .orElse(null);
+        }
+
+        job.setCompany(company);
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setRequirements(request.getRequirements());

@@ -110,6 +110,10 @@ public class Job {
     // Relationships
     // ----------------------------------------------------------------
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
