@@ -12,7 +12,9 @@ import com.jobboard.enums.Role;
 import com.jobboard.exception.BusinessException;
 import com.jobboard.exception.ResourceNotFoundException;
 import com.jobboard.exception.UnauthorizedException;
+import com.jobboard.entity.ApplicationHistory;
 import com.jobboard.entity.ResumeProfile;
+import com.jobboard.repository.ApplicationHistoryRepository;
 import com.jobboard.repository.ApplicationRepository;
 import com.jobboard.repository.JobRepository;
 import com.jobboard.repository.ResumeProfileRepository;
@@ -39,6 +41,8 @@ public class ApplicationService {
     private final ApplicationEventPublisher eventPublisher;
     private final ResumeProfileRepository resumeProfileRepository;
     private final SkillGapAnalysisService skillGapAnalysisService;
+    private final StatusTransitionValidator statusTransitionValidator;
+    private final ApplicationHistoryRepository applicationHistoryRepository;
 
     @Transactional
     public ApplicationResponse apply(Long candidateId,
@@ -159,12 +163,24 @@ public class ApplicationService {
             throw new UnauthorizedException("You cannot update applications for this job");
         }
 
-        if (app.getStatus() != ApplicationStatus.PENDING) {
-            throw new BusinessException("Application already processed");
-        }
+        ApplicationStatus oldStatus = app.getStatus();
+        ApplicationStatus newStatus = request.getStatus();
 
-        app.setStatus(request.getStatus());
+        statusTransitionValidator.validate(oldStatus, newStatus);
+
+        app.setStatus(newStatus);
         app.setEmployerNotes(request.getEmployerNotes());
+
+        ApplicationHistory history = ApplicationHistory.builder()
+                .application(app)
+                .fromStatus(oldStatus)
+                .toStatus(newStatus)
+                .notes(request.getEmployerNotes())
+                .changedBy(employerId)
+                .build();
+        applicationHistoryRepository.save(history);
+
+        log.info("Application status updated: appId={}, from={}, to={}", appId, oldStatus, newStatus);
 
         return mapper.toResponse(applicationRepository.save(app));
     }
