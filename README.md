@@ -18,72 +18,59 @@ A production-grade **Smart Recruitment Management System** connecting employers 
 
 ```mermaid
 flowchart LR
-    %% Styles
-    classDef client fill:#f0f4ff,stroke:#4a90d9,stroke-width:2px,color:#1a1a2e
-    classDef security fill:#ffe8e8,stroke:#e74c3c,stroke-width:2px,color:#1a1a2e
-    classDef api fill:#e8f8f5,stroke:#1abc9c,stroke-width:2px,color:#1a1a2e
-    classDef service fill:#eaf2fa,stroke:#3498db,stroke-width:2px,color:#1a1a2e
-    classDef repo fill:#e8f5e9,stroke:#27ae60,stroke-width:2px,color:#1a1a2e
-    classDef db fill:#fef9e7,stroke:#f39c12,stroke-width:2px,color:#1a1a2e
+    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef security fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef api fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    classDef service fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef repo fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef db fill:#fff8e1,stroke:#f57f17,stroke-width:2px
 
-    %% ── Client Layer ──
-    Client(["👥 Candidates & Employers"])
+    Client(["Candidates & Employers"])
     Client:::client
 
-    %% ── Security Layer ──
-    subgraph Security_Layer["🔒 Security Layer"]
-        direction TB
-        JWT["JWT Authentication<br/><span style='font-size:11px'>Access + Refresh Tokens</span>"]
-        ROLE["Role Authorization<br/><span style='font-size:11px'>@PreAuthorize(hasRole)</span>"]
-        CORS["CORS Configuration<br/><span style='font-size:11px'>localhost:5173</span>"]
+    subgraph Security["Security Layer"]
+        JWT["JWT Authentication"]
+        ROLE["Role Authorization"]
+        CORS["CORS Configuration"]
     end
 
-    %% ── API Layer ──
-    subgraph API_Layer["🌐 API Layer — REST Controllers"]
-        direction TB
-        AUTH["Auth<br/><span style='font-size:11px'>/register · /login · /refresh</span>"]
-        JOBCTRL["Job<br/><span style='font-size:11px'>CRUD · Search · Close</span>"]
-        APPCTRL["Application<br/><span style='font-size:11px'>Apply · Status · Rank</span>"]
-        RESUMECTRL["Resume<br/><span style='font-size:11px'>Upload · Parse · Refresh</span>"]
-        COMPANYCTRL["Company<br/><span style='font-size:11px'>Create · Update</span>"]
-        INTERVCTRL["Interview<br/><span style='font-size:11px'>Schedule · Feedback</span>"]
-        SKILLCTRL["Skill Gap<br/><span style='font-size:11px'>Analysis · Importance</span>"]
-        DASHCTRL["Dashboard<br/><span style='font-size:11px'>Analytics · Stats</span>"]
+    subgraph API["API Layer (Controllers)"]
+        AUTH["Auth"]
+        JOBCTRL["Job"]
+        APPCTRL["Application"]
+        RESUMECTRL["Resume"]
+        COMPANYCTRL["Company"]
+        INTERVCTRL["Interview"]
+        SKILLCTRL["Skill-Gap"]
+        DASHCTRL["Dashboard"]
     end
 
-    %% ── Service Layer ──
-    subgraph Service_Layer["⚙️ Service Layer — Business Logic"]
-        direction TB
-        AUTHSVC["Auth Service<br/><span style='font-size:11px'>JWT · Refresh · BCrypt</span>"]
-        JOBSVC["Job Service<br/><span style='font-size:11px'>CRUD · Specification Search</span>"]
-        APPSVC["Application Service<br/><span style='font-size:11px'>Apply · Score · State Machine</span>"]
-        RESUMESVC["Resume Parser<br/><span style='font-size:11px'>PDFBox + Regex Extraction</span>"]
-        SKILLDICT["Skill Dictionary<br/><span style='font-size:11px'>45+ Skills · Synonyms</span>"]
-        MATCHSVC["Matching Engine<br/><span style='font-size:11px'>Rule-Based · Weighted Scoring</span>"]
-        TRANSITIONS["Status Transition Validator<br/><span style='font-size:11px'>10-State ATS Workflow</span>"]
-        COMPSVC["Company Service<br/><span style='font-size:11px'>Profiles · Verification</span>"]
-        INTERVSVC["Interview Service<br/><span style='font-size:11px'>Schedule · Feedback · Cancel</span>"]
-        DASHSVC["Dashboard Service<br/><span style='font-size:11px'>Aggregated Analytics</span>"]
-        FILESVC["File Storage<br/><span style='font-size:11px'>Resume Upload · Retrieval</span>"]
+    subgraph Services["Service Layer (Business Logic)"]
+        AUTHSVC["Auth Service"]
+        JOBSVC["Job Service"]
+        APPSVC["Application Service"]
+        RESUMESVC["Resume Parser"]
+        SKILLDICT["Skill Dictionary"]
+        MATCHSVC["Matching Engine"]
+        TRANSITIONS["Status Validator"]
+        COMPSVC["Company Service"]
+        INTERVSVC["Interview Service"]
+        DASHSVC["Dashboard Service"]
     end
 
-    %% ── Repository Layer ──
-    subgraph Repository_Layer["💾 Repository Layer — Data Access"]
-        direction TB
-        USERREPO["User Repository"]
-        JOBREPO["Job Repository"]
-        APPREPO["Application Repository"]
-        RESUMEREPO["Resume Profile Repository"]
-        COMPANYREPO["Company Repository"]
-        INTERVREPO["Interview Repository"]
-        HISTREPO["Application History Repository"]
+    subgraph Repos["Repository Layer (Data Access)"]
+        USERREPO["User Repo"]
+        JOBREPO["Job Repo"]
+        APPREPO["Application Repo"]
+        RESUMEREPO["Resume Repo"]
+        COMPANYREPO["Company Repo"]
+        INTERVREPO["Interview Repo"]
+        HISTREPO["History Repo"]
     end
 
-    %% ── Database Layer ──
-    DB[("🗄️ MySQL 8<br/><span style='font-size:11px'>7 Tables · Unique Indexes</span>")]
+    DB[("MySQL 8")]
     DB:::db
 
-    %% ── Flow Connections ──
     Client --> JWT
     JWT --> ROLE
     ROLE --> CORS
@@ -130,51 +117,26 @@ flowchart LR
     INTERVREPO --> DB
     HISTREPO --> DB
 
-    %% Assign styles
-    Client:::client
-    JWT:::security
-    ROLE:::security
-    CORS:::security
-    AUTH:::api
-    JOBCTRL:::api
-    APPCTRL:::api
-    RESUMECTRL:::api
-    COMPANYCTRL:::api
-    INTERVCTRL:::api
-    SKILLCTRL:::api
-    DASHCTRL:::api
-    AUTHSVC:::service
-    JOBSVC:::service
-    APPSVC:::service
-    RESUMESVC:::service
-    SKILLDICT:::service
-    MATCHSVC:::service
-    TRANSITIONS:::service
-    COMPSVC:::service
-    INTERVSVC:::service
-    DASHSVC:::service
-    FILESVC:::service
-    USERREPO:::repo
-    JOBREPO:::repo
-    APPREPO:::repo
-    RESUMEREPO:::repo
-    COMPANYREPO:::repo
-    INTERVREPO:::repo
-    HISTREPO:::repo
+    class Client client
+    class JWT,ROLE,CORS security
+    class AUTH,JOBCTRL,APPCTRL,RESUMECTRL,COMPANYCTRL,INTERVCTRL,SKILLCTRL,DASHCTRL api
+    class AUTHSVC,JOBSVC,APPSVC,RESUMESVC,SKILLDICT,MATCHSVC,TRANSITIONS,COMPSVC,INTERVSVC,DASHSVC service
+    class USERREPO,JOBREPO,APPREPO,RESUMEREPO,COMPANYREPO,INTERVREPO,HISTREPO repo
+    class DB db
 ```
 
 ---
 
 ## 📊 Layer Legend
 
-| Color | Layer | Responsibility | Key Components |
+| Layer | Color | Responsibility | Key Components |
 |-------|-------|---------------|----------------|
-| 🔵 Blue | Client | End users interacting via HTTP | Mobile App, Web Browser, Swagger UI |
-| 🔴 Red | Security | Authentication & authorization | JWT Filter, Role Check, CORS |
-| 🟢 Teal | API | RESTful endpoint exposure | 9 Controllers (Auth, Job, Application, Resume, etc.) |
-| 🔷 Blue | Service | Core business logic & orchestration | Matching Engine, ATS Workflow, PDF Parser, Dashboard |
-| 🟢 Green | Repository | Data access via Spring Data JPA | 7 Repositories with custom queries |
-| 🟡 Yellow | Database | Persistent storage | MySQL 8 with indexes & constraints |
+| 👥 Client | Blue | End users interacting via HTTP | Mobile App, Web Browser, Swagger UI |
+| 🔒 Security | Red | Authentication & authorization | JWT Filter, Role Check, CORS |
+| 🌐 API | Teal | RESTful endpoint exposure | 9 Controllers |
+| ⚙️ Service | Blue | Core business logic & orchestration | Matching Engine, ATS Workflow, PDF Parser |
+| 💾 Repository | Green | Data access via Spring Data JPA | 7 Repositories with custom queries |
+| 🗄️ Database | Yellow | Persistent storage | MySQL 8 with indexes & constraints |
 
 ---
 
@@ -223,7 +185,7 @@ sequenceDiagram
 
     S-->>A: ApplicationResponse
     A-->>UI: 201 Created
-    UI-->>C: ✅ Application Submitted<br/>Score: 82% · Match Level: HIGH
+    UI-->>C: Application Submitted (Score: 82%)
 ```
 
 ### ATS State Machine
@@ -249,6 +211,7 @@ flowchart TD
     class APPROVED,INTERVIEW,OFFER active
     class HIRED success
     class REJECTED fail
+```
 
 ---
 
